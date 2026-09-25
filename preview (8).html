@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My School Store</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f7fb;
+  color: #172033;
+}
+
+header {
+  background: #111827;
+  color: white;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.logo span {
+  color: #60a5fa;
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sell-btn {
+  background: #60a5fa;
+  color: #07111f;
+}
+
+.search {
+  max-width: 1050px;
+  margin: 22px auto 5px;
+  padding: 0 18px;
+}
+
+.search input {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #d8deea;
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+main {
+  max-width: 1050px;
+  margin: auto;
+  padding: 10px 18px 50px;
+}
+
+.ownerbar {
+  background: #e5f0ff;
+  border: 1px solid #c8ddff;
+  border-radius: 12px;
+  padding: 11px 14px;
+  margin: 15px 0;
+  color: #16335e;
+}
+
+.topline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 16px 0;
+}
+
+.count {
+  color: #697386;
+  font-size: 14px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #e1e6ef;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 3px 12px #00000008;
+}
+
+.pic {
+  height: 160px;
+  background: #e9eef7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+}
+
+.info {
+  padding: 14px;
+}
+
+.price {
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.name {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 6px 0;
+}
+
+.muted {
+  color: #697386;
+  font-size: 13px;
+  min-height: 35px;
+}
+
+.delete-icon {
+  background: #fee2e2;
+  color: #991b1b;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  font-size: 19px;
+  float: right;
+  margin-top: 10px;
+}
+
+.empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: #697386;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #0008;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.box {
+  background: white;
+  border-radius: 18px;
+  padding: 22px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+}
+
+.box h2 {
+  margin-top: 0;
+}
+
+.box input,
+.box textarea {
+  width: 100%;
+  padding: 11px;
+  margin: 7px 0 12px;
+  border: 1px solid #d5dbe6;
+  border-radius: 9px;
+  font: inherit;
+}
+
+.box textarea {
+  min-height: 90px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+}
+
+.row > * {
+  flex: 1;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.cancel {
+  background: #e9edf3;
+}
+
+.primary {
+  background: #111827;
+  color: white;
+}
+
+.pin-error {
+  color: #b91c1c;
+  font-size: 14px;
+  min-height: 18px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">
+    My <span>School Store</span> 🛍️
+  </div>
+
+  <button class="sell-btn" onclick="openSell()">
+    + Add Stuff
+  </button>
+</header>
+
+<div class="search">
+  <input
+    id="search"
+    placeholder="Search my stuff..."
+    oninput="render()"
+  >
+</div>
+
+<main>
+
+  <div class="ownerbar">
+    <b>Owner version:</b>
+    Use <b>+ Add Stuff</b> to add your items.
+  </div>
+
+  <div class="topline">
+    <h2 style="margin:0">Items</h2>
+    <div id="count" class="count"></div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+
+</main>
+
+
+<!-- ADD ITEM WINDOW -->
+<div class="modal" id="sellModal">
+
+  <div class="box">
+
+    <h2>Add an item</h2>
+
+    <input
+      id="itemName"
+      placeholder="Item name"
+    >
+
+    <div class="row">
+
+      <div>
+        <input
+          id="itemPrice"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Price ($)"
+        >
+      </div>
+
+      <div>
+        <input
+          id="itemEmoji"
+          maxlength="2"
+          placeholder="Emoji"
+        >
+      </div>
+
+    </div>
+
+    <textarea
+      id="itemDesc"
+      placeholder="Description"
+    ></textarea>
+
+    <label>
+      Picture:
+    </label>
+
+    <input
+      id="itemPhoto"
+      type="file"
+      accept="image/*"
+    >
+
+    <div class="actions">
+
+      <button
+        class="cancel"
+        onclick="closeSell()"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="primary"
+        onclick="addItem()"
+      >
+        Add Item
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ITEM DETAILS WINDOW -->
+<div class="modal" id="itemModal">
+  <div class="box">
+    <h2 id="itemModalName"></h2>
+    <div id="itemModalPic" style="height:220px;background:#e9eef7;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:70px;overflow:hidden;margin-bottom:15px;"></div>
+    <div id="itemModalPrice" class="price"></div>
+    <p id="itemModalDesc" class="muted" style="font-size:15px;"></p>
+    <div class="actions">
+      <button class="cancel" onclick="closeItem()">Close</button>
+      <button class="primary" id="addToCartBtn">🛒 Add to Cart</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- CART WINDOW -->
+<div class="modal" id="cartModal">
+  <div class="box">
+    <h2>🛒 Your Order</h2>
+    <div id="cartItems"></div>
+    <div id="cartTotal" style="font-size:20px;font-weight:800;margin:15px 0;"></div>
+
+    <h3>Order Information</h3>
+    <input id="orderName" placeholder="Your name">
+    <input id="orderContact" placeholder="Contact information">
+    <textarea id="orderNotes" placeholder="Pickup location or notes"></textarea>
+
+    <div class="actions">
+      <button class="cancel" onclick="closeCart()">Close</button>
+      <button class="primary" onclick="placeOrder()">Place Order</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ORDER COMPLETE WINDOW -->
+<div class="modal" id="orderCompleteModal">
+  <div class="box" style="text-align:center;">
+    <h2>✅ Order Submitted!</h2>
+    <p>Your order has been saved.</p>
+    <p id="orderNumber"></p>
+    <div class="actions">
+      <button class="primary" onclick="closeOrderComplete()">Done</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- DELETE PIN WINDOW -->
+<div class="modal" id="deleteModal">
+
+  <div class="box">
+
+    <h2>Owner PIN</h2>
+
+    <p>
+      Enter your PIN to delete this item.
+    </p>
+
+    <input
+      id="deletePin"
+      type="password"
+      inputmode="numeric"
+      placeholder="Owner PIN"
+    >
+
+    <div
+      id="pinError"
+      class="pin-error"
+    ></div>
+
+    <div class="actions">
+
+      <button
+        class="cancel"
+        onclick="closeDelete()"
+      >
+        Cancel
+      </button>
+
+      <button
+        class="primary"
+        onclick="confirmDelete()"
+      >
+        Delete
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   SETTINGS
+========================= */
+
+const STORAGE_KEY = "my-school-store-items";
+
+/* CHANGE THIS TO YOUR OWN PIN */
+const OWNER_PIN = "2468";
+
+
+/* =========================
+   LOAD ITEMS
+========================= */
+
+let items = JSON.parse(
+  localStorage.getItem(STORAGE_KEY) || "[]"
+);
+
+let itemToDelete = null;
+let cart = JSON.parse(localStorage.getItem("my-school-store-cart") || "[]");
+let selectedItemId = null;
+
+
+/* =========================
+   SAVE ITEMS
+========================= */
+
+function saveItems() {
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(items)
+  );
+
+}
+
+
+/* =========================
+   SECURITY / HTML
+========================= */
+
+function escapeHtml(text) {
+
+  return String(text).replace(
+    /[&<>"']/g,
+    function (character) {
+
+      return {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[character];
+
+    }
+  );
+
+}
+
+
+/* =========================
+   DISPLAY ITEMS
+========================= */
+
+function render() {
+
+  const searchText =
+    document
+      .getElementById("search")
+      .value
+      .toLowerCase();
+
+  const visibleItems = items.filter(function(item) {
+
+    return (
+      item.name.toLowerCase().includes(searchText) ||
+      item.description.toLowerCase().includes(searchText)
+    );
+
+  });
+
+
+  document.getElementById("count").textContent =
+    visibleItems.length +
+    (
+      visibleItems.length === 1
+        ? " item"
+        : " items"
+    );
+
+
+  if (visibleItems.length === 0) {
+
+    document.getElementById("grid").innerHTML =
+      '<div class="empty">No items posted yet.</div>';
+
+    return;
+
+  }
+
+
+  document.getElementById("grid").innerHTML =
+    visibleItems.map(function(item) {
+
+      return `
+
+        <article
+          class="card"
+          id="item-${item.id}"
+          onclick="openItem(${item.id})"
+          style="cursor:pointer;"
+        >
+
+          <div class="pic">
+
+            ${
+              item.photo
+
+                ? `<img
+                    src="${item.photo}"
+                    style="
+                      width:100%;
+                      height:100%;
+                      object-fit:cover;
+                    "
+                  >`
+
+                : escapeHtml(
+                    item.emoji || "📦"
+                  )
+            }
+
+          </div>
+
+
+          <div class="info">
+
+            <div class="price">
+              $${Number(item.price).toFixed(2)}
+            </div>
+
+
+            <div class="name">
+              ${escapeHtml(item.name)}
+            </div>
+
+
+            <div class="muted">
+              ${escapeHtml(item.description)}
+            </div>
+
+
+            <button
+              type="button"
+              class="delete-icon"
+              title="Delete item"
+              aria-label="Delete item"
+              onclick="event.stopPropagation(); requestDelete(${item.id})"
+            >
+              🗑️
+            </button>
+
+            <div style="clear:both"></div>
+
+          </div>
+
+        </article>
+
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================
+   ICON MENU
+========================= */
+
+function toggleMenu() {
+  const menu = document.getElementById("iconMenu");
+  const icon = document.querySelector(".store-icon");
+  menu.classList.toggle("show");
+  icon.setAttribute("aria-expanded", menu.classList.contains("show"));
+}
+
+function closeMenu() {
+  const menu = document.getElementById("iconMenu");
+  const icon = document.querySelector(".store-icon");
+  menu.classList.remove("show");
+  icon.setAttribute("aria-expanded", "false");
+}
+
+function goHome() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  closeMenu();
+}
+
+function focusSearch() {
+  const search = document.getElementById("search");
+  search.focus();
+  search.scrollIntoView({ behavior: "smooth", block: "center" });
+  closeMenu();
+}
+
+document.addEventListener("click", function(event) {
+  const logo = document.querySelector(".logo");
+  if (!logo.contains(event.target)) {
+    closeMenu();
+  }
+});
+
+
+/* =========================
+   ADD ITEM WINDOW
+========================= */
+
+function openSell() {
+
+  document
+    .getElementById("sellModal")
+    .classList.add("show");
+
+}
+
+
+function closeSell() {
+
+  document
+    .getElementById("sellModal")
+    .classList.remove("show");
+
+}
+
+
+/* =========================
+   ADD ITEM
+========================= */
+
+function addItem() {
+
+  const name =
+    document
+      .getElementById("itemName")
+      .value
+      .trim();
+
+
+  const price =
+    document
+      .getElementById("itemPrice")
+      .value;
+
+
+  const description =
+    document
+      .getElementById("itemDesc")
+      .value
+      .trim();
+
+
+  const emoji =
+    document
+      .getElementById("itemEmoji")
+      .value
+      .trim();
+
+
+  if (!name) {
+
+    alert("Please enter an item name.");
+
+    return;
+
+  }
+
+
+  if (price === "") {
+
+    alert("Please enter a price.");
+
+    return;
+
+  }
+
+
+  const photoInput =
+    document.getElementById("itemPhoto");
+
+
+  const file =
+    photoInput.files[0];
+
+
+  function finishAdding(photoData = "") {
+
+    const newItem = {
+
+      id: Date.now(),
+
+      name: name,
+
+      price: Number(price),
+
+      description:
+        description || "No description.",
+
+      emoji:
+        emoji || "📦",
+
+      photo:
+        photoData
+
+    };
+
+
+    items.unshift(newItem);
+
+    saveItems();
+
+    closeSell();
+
+    document.getElementById("itemName").value = "";
+
+    document.getElementById("itemPrice").value = "";
+
+    document.getElementById("itemDesc").value = "";
+
+    document.getElementById("itemEmoji").value = "";
+
+    document.getElementById("itemPhoto").value = "";
+
+    render();
+
+  }
+
+
+  if (file) {
+
+    const reader = new FileReader();
+
+
+    reader.onload = function() {
+
+      finishAdding(reader.result);
+
+    };
+
+
+    reader.readAsDataURL(file);
+
+  }
+
+  else {
+
+    finishAdding();
+
+  }
+
+}
+
+
+/* =========================
+   ITEM DETAILS WINDOW
+========================= */
+
+function openItem(id) {
+  selectedItemId = id;
+
+  const item = items.find(function(item) {
+    return item.id === id;
+  });
+
+  if (!item) return;
+
+  document.getElementById("itemModalName").textContent = item.name;
+  document.getElementById("itemModalPrice").textContent =
+    "$" + Number(item.price).toFixed(2);
+  document.getElementById("itemModalDesc").textContent =
+    item.description || "No description.";
+
+  const pic = document.getElementById("itemModalPic");
+
+  if (item.photo) {
+    pic.innerHTML = '<img src="' + item.photo + '" style="width:100%;height:100%;object-fit:cover;">';
+  } else {
+    pic.textContent = item.emoji || "📦";
+  }
+
+  document.getElementById("addToCartBtn").onclick = function() {
+    addToCart(selectedItemId);
+  };
+
+  document.getElementById("itemModal").classList.add("show");
+}
+
+function closeItem() {
+  document.getElementById("itemModal").classList.remove("show");
+}
+
+
+/* =========================
+   CART / ORDERS
+========================= */
+
+function saveCart() {
+  localStorage.setItem("my-school-store-cart", JSON.stringify(cart));
+  updateCartCount();
+}
+
+function updateCartCount() {
+  const count = cart.reduce(function(total, item) {
+    return total + item.quantity;
+  }, 0);
+
+  const el = document.getElementById("cartCount");
+  if (el) el.textContent = count;
+}
+
+function addToCart(id) {
+  const item = items.find(function(item) {
+    return item.id === id;
+  });
+
+  if (!item) return;
+
+  const existing = cart.find(function(cartItem) {
+    return cartItem.id === id;
+  });
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({
+      id: item.id,
+      name: item.name,
+      price: Number(item.price),
+      quantity: 1
+    });
+  }
+
+  saveCart();
+  closeItem();
+  alert(item.name + " was added to your cart!");
+}
+
+function openCart() {
+  renderCart();
+  document.getElementById("cartModal").classList.add("show");
+}
+
+function closeCart() {
+  document.getElementById("cartModal").classList.remove("show");
+}
+
+function renderCart() {
+  const container = document.getElementById("cartItems");
+
+  if (cart.length === 0) {
+    container.innerHTML = '<div class="empty" style="padding:30px 10px;">Your cart is empty.</div>';
+    document.getElementById("cartTotal").textContent = "";
+    return;
+  }
+
+  let total = 0;
+
+  container.innerHTML = cart.map(function(cartItem) {
+    const itemTotal = cartItem.price * cartItem.quantity;
+    total += itemTotal;
+
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e1e6ef;padding:12px 0;gap:10px;">
+        <div>
+          <b>${escapeHtml(cartItem.name)}</b>
+          <div class="muted">$${cartItem.price.toFixed(2)} × ${cartItem.quantity}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button onclick="changeQuantity(${cartItem.id}, -1)">−</button>
+          <span>${cartItem.quantity}</span>
+          <button onclick="changeQuantity(${cartItem.id}, 1)">+</button>
+          <button onclick="removeFromCart(${cartItem.id})">🗑️</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("cartTotal").textContent =
+    "Total: $" + total.toFixed(2);
+}
+
+function changeQuantity(id, amount) {
+  const item = cart.find(function(cartItem) {
+    return cartItem.id === id;
+  });
+
+  if (!item) return;
+
+  item.quantity += amount;
+
+  if (item.quantity <= 0) {
+    cart = cart.filter(function(cartItem) {
+      return cartItem.id !== id;
+    });
+  }
+
+  saveCart();
+  renderCart();
+}
+
+function removeFromCart(id) {
+  cart = cart.filter(function(cartItem) {
+    return cartItem.id !== id;
+  });
+
+  saveCart();
+  renderCart();
+}
+
+function placeOrder() {
+  if (cart.length === 0) {
+    alert("Your cart is empty.");
+    return;
+  }
+
+  const name = document.getElementById("orderName").value.trim();
+  const contact = document.getElementById("orderContact").value.trim();
+  const notes = document.getElementById("orderNotes").value.trim();
+
+  if (!name) {
+    alert("Please enter your name.");
+    return;
+  }
+
+  const orders = JSON.parse(localStorage.getItem("my-school-store-orders") || "[]");
+
+  const order = {
+    id: Date.now(),
+    name: name,
+    contact: contact,
+    notes: notes,
+    items: cart,
+    date: new Date().toLocaleString()
+  };
+
+  orders.push(order);
+  localStorage.setItem("my-school-store-orders", JSON.stringify(orders));
+
+  document.getElementById("orderNumber").textContent =
+    "Order #" + order.id;
+
+  cart = [];
+  saveCart();
+
+  document.getElementById("orderName").value = "";
+  document.getElementById("orderContact").value = "";
+  document.getElementById("orderNotes").value = "";
+
+  closeCart();
+  document.getElementById("orderCompleteModal").classList.add("show");
+}
+
+function closeOrderComplete() {
+  document.getElementById("orderCompleteModal").classList.remove("show");
+}
+
+
+/* =========================
+   DELETE ITEM
+========================= */
+
+function requestDelete(id) {
+
+  itemToDelete = id;
+
+  document.getElementById("deletePin").value = "";
+
+  document.getElementById("pinError").textContent = "";
+
+  document
+    .getElementById("deleteModal")
+    .classList.add("show");
+
+  setTimeout(function() {
+
+    document
+      .getElementById("deletePin")
+      .focus();
+
+  }, 100);
+
+}
+
+
+function closeDelete() {
+
+  itemToDelete = null;
+
+  document
+    .getElementById("deleteModal")
+    .classList.remove("show");
+
+}
+
+
+/* =========================
+   CONFIRM DELETE
+========================= */
+
+function confirmDelete() {
+
+  const pin =
+    document
+      .getElementById("deletePin")
+      .value;
+
+
+  if (pin !== OWNER_PIN) {
+
+    document
+      .getElementById("pinError")
+      .textContent =
+      "Wrong PIN.";
+
+    return;
+
+  }
+
+
+  if (itemToDelete === null) {
+
+    return;
+
+  }
+
+
+  items =
+    items.filter(function(item) {
+
+      return item.id !== itemToDelete;
+
+    });
+
+
+  saveItems();
+
+  closeDelete();
+
+  render();
+
+}
+
+
+/* =========================
+   START
+========================= */
+
+render();
+updateCartCount();
+
+</script>
+
+</body>
+</html>
